@@ -1,0 +1,50 @@
+﻿name: Release CLI on master push
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build-release:
+    name: Build & Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Get version string
+        id: version
+        run: |
+          $date = Get-Date -Format "yyyy.MM.dd"
+          $runNumber = "${{ github.run_number }}"
+          echo "version=$date.$runNumber" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+
+      - name: Build self-contained exe
+        run: >
+          dotnet publish -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -o publish
+
+      - name: Rename binary with version
+        run: |
+          Rename-Item -Path publish/TreeView.exe -NewName "treeview-${{ steps.version.outputs.version }}.exe"
+        shell: pwsh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          files: publish/treeview-${{ steps.version.outputs.version }}.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
