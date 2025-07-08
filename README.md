@@ -29,3 +29,21 @@ Rename and move to a folder in your `PATH`, e.g., `treeview.exe`.
 git clone https://github.com/basmulder03/tree-viewer.git
 cd tree-viewer
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+```
+
+output will be in: `bin/Release/net9.0/win-x64/publish/treeview.exe`
+
+## 🛠 Usage
+```bash
+treeview [path] [depth]
+```
+
+- `path`: The directory to visualize (default: current directory)
+- `depth`: Maximum depth to display (default: 10)
+
+## Development
+
+This project is build using:
+- [.NET 9](https://dotnet.microsoft.com)
+- [Spectre.Console](https://spectreconsole.net/)
+- GitHub Actions for CI/CD
